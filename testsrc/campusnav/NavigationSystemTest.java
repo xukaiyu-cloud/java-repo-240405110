@@ -43,6 +43,19 @@ public class NavigationSystemTest {
         assertTrue("模式名应忽略大小写", result.contains("步行"));
     }
 
+    @Test
+    public void testBikeMode() {
+        String result = system.navigate("图书馆", "体育馆", "bike");
+        assertNotNull("bike 模式不应返回 null", result);
+        assertTrue("bike 模式应包含'骑行'", result.contains("骑行"));
+    }
+
+    @Test
+    public void testChineseBikeModeName() {
+        String result = system.navigate("钟楼", "教学楼", "骑行");
+        assertTrue("中文骑行模式名应可用", result.contains("骑行"));
+    }
+
     // ---------- 异常场景 ----------
 
     @Test

@@ -5,7 +5,7 @@ package campusnav;
  * 不使用集合框架，地点信息用数组存储。
  */
 public class NavigationSystem {
-    private static final String MODE_HINT = "可用模式：步行(walk)、公交(bus)";
+    private static final String MODE_HINT = "可用模式：步行(walk)、公交(bus)、骑行(bike)";
 
     private Place[] places;
 
@@ -73,6 +73,8 @@ public class NavigationSystem {
             route = new WalkRoute(from, to);
         } else if (normalizedMode.equalsIgnoreCase("bus") || normalizedMode.equals("公交")) {
             route = new BusRoute(from, to);
+        } else if (normalizedMode.equalsIgnoreCase("bike") || normalizedMode.equals("骑行")) {
+            route = new BikeRoute(from, to);
         } else {
             return "[校园导航] 不支持的出行模式「" + normalizedMode + "」，" + MODE_HINT;
         }
