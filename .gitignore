@@ -1,0 +1,13 @@
+# 编译输出目录
+bin/
+out/
+*.class
+
+# IDE 个人配置
+.idea/
+*.iml
+.settings/
+.vscode/
+
+# 临时文件
+*.log
