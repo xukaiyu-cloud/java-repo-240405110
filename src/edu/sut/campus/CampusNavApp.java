@@ -61,7 +61,9 @@ public class CampusNavApp {
         while (true) {
             System.out.println("====== 校园导航系统 ======");
             System.out.println("  1. 步行导航（walk）");
-            System.out.println("  2. 校车导航（shuttle）");
+            System.out.println("  2. 骑行导航（bike）");
+            System.out.println("  3. 校车导航（shuttle）");
+            System.out.println("  4. 混合导航（hybrid）");
             System.out.println("  0. 退出");
             System.out.print("请选择导航方式：");
             String choice = scanner.nextLine().trim();
@@ -74,10 +76,16 @@ public class CampusNavApp {
                 modeCode = "walk";
                 System.out.println("已选择：步行导航");
             } else if ("2".equals(choice)) {
+                modeCode = "bike";
+                System.out.println("已选择：骑行导航");
+            } else if ("3".equals(choice)) {
                 modeCode = "shuttle";
                 System.out.println("已选择：校车导航");
+            } else if ("4".equals(choice)) {
+                modeCode = "hybrid";
+                System.out.println("已选择：混合导航");
             } else {
-                System.out.println("输入有误：请输入 0 ~ 2 之间的序号。");
+                System.out.println("输入有误：请输入 0 ~ 4 之间的序号。");
                 System.out.println();
                 continue;
             }
@@ -100,15 +108,21 @@ public class CampusNavApp {
                 system.navigate("南门", "第一教学楼", "walk"));
         printResult("演示3：南门 -> 体育馆（校车）",
                 system.navigate("南门", "体育馆", "shuttle"));
-        printResult("演示4：方式代码不区分大小写（WALK）",
+        printResult("演示4：图书馆 -> 第一教学楼（骑行）",
+                system.navigate("图书馆", "第一教学楼", "bike"));
+        printResult("演示5：图书馆 -> 第一教学楼（混合，短距离推荐步行）",
+                system.navigate("图书馆", "第一教学楼", "hybrid"));
+        printResult("演示6：南门 -> 体育馆（混合，长距离推荐校车组合）",
+                system.navigate("南门", "体育馆", "hybrid"));
+        printResult("演示7：方式代码不区分大小写（WALK）",
                 system.navigate("图书馆", "第一教学楼", "WALK"));
-        printResult("演示5：起点与终点相同（边界情况）",
+        printResult("演示8：起点与终点相同（边界情况）",
                 system.navigate("图书馆", "图书馆", "walk"));
-        printResult("演示6：输入不存在的地点（容错）",
+        printResult("演示9：输入不存在的地点（容错）",
                 system.navigate("图书馆", "火星", "walk"));
-        printResult("演示7：输入不支持的导航方式（容错）",
+        printResult("演示10：输入不支持的导航方式（容错）",
                 system.navigate("图书馆", "第一教学楼", "fly"));
-        printResult("演示8：输入为空（容错）",
+        printResult("演示11：输入为空（容错）",
                 system.navigate("   ", "第一教学楼", "walk"));
     }
 
