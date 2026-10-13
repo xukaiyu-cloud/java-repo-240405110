@@ -27,9 +27,22 @@ public class CampusMap {
         locationCount = 0;
     }
 
-    /** 添加一个地点，返回该地点的下标。 */
+    /**
+     * 添加一个地点，返回该地点的下标。
+     * 名称不能为空且不能与已有地点重名，地图容量不能超出构造时的 capacity。
+     */
     public int addLocation(String name, String description) {
-        locations[locationCount] = new Location(locationCount, name, description);
+        if (name == null || name.trim().isEmpty()) {
+            throw new IllegalArgumentException("地点名称不能为空");
+        }
+        if (findLocationIndex(name) >= 0) {
+            throw new IllegalArgumentException("地点已存在：" + name);
+        }
+        if (locationCount >= locations.length) {
+            throw new IllegalStateException("地图容量已满，最多容纳 " + locations.length + " 个地点");
+        }
+        locations[locationCount] = new Location(locationCount, name.trim(),
+                description == null ? "" : description);
         locationCount++;
         return locationCount - 1;
     }
@@ -50,6 +63,9 @@ public class CampusMap {
 
     /** 按下标获取地点。 */
     public Location getLocation(int index) {
+        if (index < 0 || index >= locationCount) {
+            throw new IllegalArgumentException("地点下标越界：" + index);
+        }
         return locations[index];
     }
 

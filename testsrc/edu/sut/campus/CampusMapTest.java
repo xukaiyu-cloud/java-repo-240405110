@@ -38,6 +38,23 @@ public class CampusMapTest {
         assertNull(map.getLocationByName("不存在的地方"));
     }
 
+    @Test(expected = IllegalArgumentException.class)
+    public void testAddDuplicateLocationThrows() {
+        map.addLocation("图书馆", "重复添加");
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testAddBlankNameThrows() {
+        map.addLocation("   ", "空白名称");
+    }
+
+    @Test(expected = IllegalStateException.class)
+    public void testAddLocationBeyondCapacityThrows() {
+        CampusMap small = new CampusMap(1);
+        small.addLocation("A", "");
+        small.addLocation("B", ""); // 超出容量 1
+    }
+
     @Test
     public void testAddRoadIsTwoWay() {
         CampusMap small = new CampusMap(2);

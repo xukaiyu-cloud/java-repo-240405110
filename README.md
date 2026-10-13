@@ -54,3 +54,4 @@ java -cp "bin;lib/junit-4.13.2.jar;lib/hamcrest-core-1.3.jar" org.junit.runner.J
 | 提交 | 说明 |
 | ---- | ---- |
 | 1 | init: 校园导航系统初始版本（if-else 实现步行/校车两种方案） |
+| 2 | style: 优化提示语格式与代码结构，增强输入容错（空输入/大小写/首尾空格），补充边界测试 |
