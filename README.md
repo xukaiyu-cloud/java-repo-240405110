@@ -16,11 +16,17 @@
 
 ```
 java-repo-240405110
-├── src/edu/sut/campus      业务源码
+├── src/edu/sut/campus      业务源码（面向对象版本）
 │   ├── Location.java           地点实体（私有字段 + 访问方法）
 │   ├── CampusMap.java          校园地图（邻接矩阵 + Dijkstra）
-│   ├── NavigationSystem.java   导航系统（if-else 多方案）
-│   └── CampusNavApp.java       主程序（控制台菜单 + 演示模式）
+│   ├── Route.java              导航结果（起点/终点/途经点/里程）
+│   ├── NavigationMode.java     导航方式【抽象类】（公共流程）
+│   ├── WalkMode/BikeMode/      各导航方式子类（速度/附加耗时/提示语）
+│   │   ShuttleMode/HybridMode.java
+│   ├── NavigationSystem.java   导航系统（数组保存各方式，多态分发）
+│   ├── CampusNavApp.java       主程序（控制台菜单 + 演示模式）
+│   └── ifelse/                 不使用抽象类的 if-else 旧版（对比用）
+│       └── IfElseNavigationSystem.java
 ├── testsrc/edu/sut/campus  JUnit 4 单元测试
 ├── lib/                    junit-4.13.2.jar、hamcrest-core-1.3.jar
 └── README.md
@@ -37,6 +43,9 @@ java -cp bin edu.sut.campus.CampusNavApp
 
 # 演示模式（连续输出多条导航结果）
 java -cp bin edu.sut.campus.CampusNavApp --demo
+
+# 用 if-else 旧版执行同一批演示用例（输出与上一条完全一致，用于对比）
+java -cp bin edu.sut.campus.CampusNavApp --demo-ifelse
 ```
 
 在 Eclipse 中：项目右键 → New → Source Folder 建立 `testsrc`，Properties → Java Build Path → Libraries → Add JARs 引入 `lib` 下两个 jar。
@@ -46,8 +55,12 @@ java -cp bin edu.sut.campus.CampusNavApp --demo
 ## 运行单元测试
 
 ```bash
-java -cp "bin;lib/junit-4.13.2.jar;lib/hamcrest-core-1.3.jar" org.junit.runner.JUnitCore edu.sut.campus.CampusMapTest edu.sut.campus.NavigationSystemTest
+java -cp "bin;lib/junit-4.13.2.jar;lib/hamcrest-core-1.3.jar" org.junit.runner.JUnitCore edu.sut.campus.CampusMapTest edu.sut.campus.NavigationSystemTest edu.sut.campus.NavigationModeTest edu.sut.campus.IfElseNavigationSystemTest
 ```
+
+共 36 个用例：正常场景、边界场景（起终点相同、800/801 米阈值、直达与绕行等价）、
+异常/容错场景（空输入、未知地点、未知方式、容量超限、下标越界），
+以及新旧实现等价性回归测试。
 
 ## 版本迭代记录
 
@@ -56,3 +69,4 @@ java -cp "bin;lib/junit-4.13.2.jar;lib/hamcrest-core-1.3.jar" org.junit.runner.J
 | 1 | init: 校园导航系统初始版本（if-else 实现步行/校车两种方案） |
 | 2 | style: 优化提示语格式与代码结构，增强输入容错（空输入/大小写/首尾空格），补充边界测试 |
 | 3 | feat: 在 if-else 结构中新增骑行、混合两种导航方案，补充对应测试（体会分支膨胀的弊端） |
+| 4 | refactor: 引入抽象类 NavigationMode 与多态重构导航系统；旧 if-else 版保留于 ifelse 包作对比；新增扩展性测试与新旧等价性回归测试 |

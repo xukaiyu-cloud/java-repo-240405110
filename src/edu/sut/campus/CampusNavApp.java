@@ -2,22 +2,41 @@ package edu.sut.campus;
 
 import java.util.Scanner;
 
+import edu.sut.campus.ifelse.IfElseNavigationSystem;
+
 /**
  * 校园导航系统主程序（控制台界面）。
  *
  * 运行方式：
- *   java edu.sut.campus.CampusNavApp          进入交互式菜单
- *   java edu.sut.campus.CampusNavApp --demo   自动演示若干条导航（便于截图记录）
+ *   java edu.sut.campus.CampusNavApp               进入交互式菜单（多态版本）
+ *   java edu.sut.campus.CampusNavApp --demo        自动演示若干条导航（便于截图记录）
+ *   java edu.sut.campus.CampusNavApp --demo-ifelse 用 if-else 旧版演示同一批用例（对比输出）
  */
 public class CampusNavApp {
 
+    /** 演示用例：{说明, 起点, 终点, 方式代码}，两种实现共用同一批用例。 */
+    private static final String[][] DEMO_CASES = {
+            {"图书馆 -> 第一教学楼（步行）", "图书馆", "第一教学楼", "walk"},
+            {"南门 -> 第一教学楼（步行，多途经点）", "南门", "第一教学楼", "walk"},
+            {"南门 -> 体育馆（校车）", "南门", "体育馆", "shuttle"},
+            {"图书馆 -> 第一教学楼（骑行）", "图书馆", "第一教学楼", "bike"},
+            {"图书馆 -> 第一教学楼（混合，短距离推荐步行）", "图书馆", "第一教学楼", "hybrid"},
+            {"南门 -> 体育馆（混合，长距离推荐校车组合）", "南门", "体育馆", "hybrid"},
+            {"方式代码不区分大小写（WALK）", "图书馆", "第一教学楼", "WALK"},
+            {"起点与终点相同（边界情况）", "图书馆", "图书馆", "walk"},
+            {"输入不存在的地点（容错）", "图书馆", "火星", "walk"},
+            {"输入不支持的导航方式（容错）", "图书馆", "第一教学楼", "fly"},
+            {"输入为空（容错）", "   ", "第一教学楼", "walk"},
+    };
+
     public static void main(String[] args) {
         CampusMap map = createDemoCampus();
-        NavigationSystem system = new NavigationSystem(map);
         if (args.length > 0 && "--demo".equals(args[0])) {
-            runDemo(system);
+            runDemo(new NavigationSystem(map));
+        } else if (args.length > 0 && "--demo-ifelse".equals(args[0])) {
+            runDemoIfElse(new IfElseNavigationSystem(map));
         } else {
-            runMenu(system);
+            runMenu(new NavigationSystem(map));
         }
     }
 
@@ -55,15 +74,19 @@ public class CampusNavApp {
         return map;
     }
 
-    /** 交互式菜单：由用户选择导航方式并输入起点、终点。 */
+    /**
+     * 交互式菜单：菜单项直接由已注册的导航方式生成，
+     * 以后新增一种方式（增加一个子类并注册）时，本菜单无需修改。
+     */
     private static void runMenu(NavigationSystem system) {
+        NavigationMode[] modes = system.getModes();
         Scanner scanner = new Scanner(System.in);
         while (true) {
             System.out.println("====== 校园导航系统 ======");
-            System.out.println("  1. 步行导航（walk）");
-            System.out.println("  2. 骑行导航（bike）");
-            System.out.println("  3. 校车导航（shuttle）");
-            System.out.println("  4. 混合导航（hybrid）");
+            for (int i = 0; i < modes.length; i++) {
+                System.out.println("  " + (i + 1) + ". " + modes[i].getDisplayName()
+                        + "导航（" + modes[i].getCode() + "）");
+            }
             System.out.println("  0. 退出");
             System.out.print("请选择导航方式：");
             String choice = scanner.nextLine().trim();
@@ -71,29 +94,24 @@ public class CampusNavApp {
                 System.out.println("感谢使用，再见！");
                 break;
             }
-            String modeCode;
-            if ("1".equals(choice)) {
-                modeCode = "walk";
-                System.out.println("已选择：步行导航");
-            } else if ("2".equals(choice)) {
-                modeCode = "bike";
-                System.out.println("已选择：骑行导航");
-            } else if ("3".equals(choice)) {
-                modeCode = "shuttle";
-                System.out.println("已选择：校车导航");
-            } else if ("4".equals(choice)) {
-                modeCode = "hybrid";
-                System.out.println("已选择：混合导航");
-            } else {
-                System.out.println("输入有误：请输入 0 ~ 4 之间的序号。");
+            int index = -1;
+            try {
+                index = Integer.parseInt(choice);
+            } catch (NumberFormatException e) {
+                index = -1;
+            }
+            if (index < 1 || index > modes.length) {
+                System.out.println("输入有误：请输入 0 ~ " + modes.length + " 之间的序号。");
                 System.out.println();
                 continue;
             }
+            NavigationMode mode = modes[index - 1];
+            System.out.println("已选择：" + mode.getDisplayName() + "导航");
             System.out.print("请输入起点名称：");
             String from = scanner.nextLine();
             System.out.print("请输入终点名称：");
             String to = scanner.nextLine();
-            System.out.println(system.navigate(from, to, modeCode));
+            System.out.println(system.navigate(from, to, mode.getCode()));
             System.out.println();
         }
         scanner.close();
@@ -101,29 +119,20 @@ public class CampusNavApp {
 
     /** 演示模式：连续输出多条导航结果，便于截图记录。 */
     private static void runDemo(NavigationSystem system) {
-        System.out.println("========== 校园导航系统 演示 ==========");
-        printResult("演示1：图书馆 -> 第一教学楼（步行）",
-                system.navigate("图书馆", "第一教学楼", "walk"));
-        printResult("演示2：南门 -> 第一教学楼（步行，多途经点）",
-                system.navigate("南门", "第一教学楼", "walk"));
-        printResult("演示3：南门 -> 体育馆（校车）",
-                system.navigate("南门", "体育馆", "shuttle"));
-        printResult("演示4：图书馆 -> 第一教学楼（骑行）",
-                system.navigate("图书馆", "第一教学楼", "bike"));
-        printResult("演示5：图书馆 -> 第一教学楼（混合，短距离推荐步行）",
-                system.navigate("图书馆", "第一教学楼", "hybrid"));
-        printResult("演示6：南门 -> 体育馆（混合，长距离推荐校车组合）",
-                system.navigate("南门", "体育馆", "hybrid"));
-        printResult("演示7：方式代码不区分大小写（WALK）",
-                system.navigate("图书馆", "第一教学楼", "WALK"));
-        printResult("演示8：起点与终点相同（边界情况）",
-                system.navigate("图书馆", "图书馆", "walk"));
-        printResult("演示9：输入不存在的地点（容错）",
-                system.navigate("图书馆", "火星", "walk"));
-        printResult("演示10：输入不支持的导航方式（容错）",
-                system.navigate("图书馆", "第一教学楼", "fly"));
-        printResult("演示11：输入为空（容错）",
-                system.navigate("   ", "第一教学楼", "walk"));
+        System.out.println("========== 校园导航系统 演示（抽象类 + 多态版本） ==========");
+        for (int i = 0; i < DEMO_CASES.length; i++) {
+            String[] item = DEMO_CASES[i];
+            printResult(item[0], system.navigate(item[1], item[2], item[3]));
+        }
+    }
+
+    /** 用 if-else 旧版执行同一批演示用例，便于对比两种实现的输出是否一致。 */
+    private static void runDemoIfElse(IfElseNavigationSystem legacy) {
+        System.out.println("========== 校园导航系统 演示（if-else 旧版本） ==========");
+        for (int i = 0; i < DEMO_CASES.length; i++) {
+            String[] item = DEMO_CASES[i];
+            printResult(item[0], legacy.navigate(item[1], item[2], item[3]));
+        }
     }
 
     private static void printResult(String title, String result) {
